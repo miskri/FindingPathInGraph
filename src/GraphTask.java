@@ -9,16 +9,70 @@ public class GraphTask {
    public static void main (String[] args) {
       GraphTask a = new GraphTask();
       a.run();
-      throw new RuntimeException ("Nothing implemented yet!"); // delete this
    }
 
    /** Actual main method to run examples and everything. */
    public void run() {
-      Graph g = new Graph ("G");
-      g.createRandomSimpleGraph (6, 9);
-      System.out.println (g);
+      Graph g = new Graph ("A");
+      g.createRandomSimpleGraph (10, 15); // 2500, 3123475
+      //System.out.println(g.toString());
+      getOptimizedPath(g, g.first, "v10");
+   }
 
-      // TODO!!! Your experiments here
+   private void getOptimizedPath(Graph source, Vertex startPoint, String destinationId) {
+      GraphPathManager graphPathManager = new GraphPathManager();
+      List<Path> paths = new ArrayList<>();
+      int index = 0;
+      long time = System.currentTimeMillis();
+      while (true) {
+         try {
+            source.findPath(graphPathManager, startPoint, destinationId);
+         }
+         catch (RuntimeException e) {
+            break;
+         }
+         graphPathManager.pathPointsCorrection(startPoint.id, destinationId);
+         paths.add(index, graphPathManager.getPath());
+         index++;
+      }
+      int highestPoint = 10000;
+      Path bestPath = null;
+      for (Path path : paths) {
+         System.out.println(path.toString());
+         if (path.highestPoint <= highestPoint) {
+            highestPoint = path.highestPoint;
+            bestPath = path;
+         }
+      }
+      System.out.println("Time spent in seconds: " + (System.currentTimeMillis() - time) / 1000 + "\nTotal path count: "
+              + paths.size() + "\n\nBest path");
+
+      assert bestPath != null;
+      System.out.println(bestPath.toString());
+   }
+
+   /** Class that generates realistic elevation values ranging from -28 to 5642 meters
+    * (the lowest and highest point in Europe above sea level). */
+   static class HeightGenerator {
+      static int previousHeight = 143; // 143m height of the center of Tallinn above sea level
+      static int maxValueElevation = 10; // 10m maximal difference between 2 vertices
+      static int heightMin = -28; // -28m
+      static int heightMax = 5642; // 5642m
+
+      static int getHeight() {
+         Random rand = new Random();
+         int value = rand.nextInt(maxValueElevation);
+         int direction = rand.nextBoolean() ? 1 : -1;
+         value *= direction;
+         if (previousHeight + value >= heightMin && previousHeight + value <= heightMax) {
+            previousHeight += value;
+         } else if (previousHeight + value < heightMin) {
+            previousHeight = heightMin;
+         } else {
+            previousHeight = heightMax;
+         }
+         return previousHeight;
+      }
    }
 
    // TODO!!! add javadoc relevant to your problem
@@ -27,8 +81,10 @@ public class GraphTask {
       private String id;
       private Vertex next;
       private Arc first;
-      private int info = 0;
+      private int info;
       // You can add more fields, if needed
+      private int height = HeightGenerator.getHeight();
+      private boolean inIgnore = false;
 
       Vertex (String s, Vertex v, Arc e) {
          id = s;
@@ -44,8 +100,6 @@ public class GraphTask {
       public String toString() {
          return id;
       }
-
-      // TODO!!! Your Vertex methods here!
    }
 
 
@@ -76,8 +130,102 @@ public class GraphTask {
       }
 
       // TODO!!! Your Arc methods here!
-   } 
+   }
 
+   class Path {
+
+      private final LinkedList<Vertex> pathPoints;
+      private final String stringRepresentation;
+      private final int highestPoint;
+
+      Path (LinkedList<Vertex> pathPoints, String text, int highestPoint) {
+         this.pathPoints = pathPoints;
+         this.stringRepresentation = text;
+         this.highestPoint = highestPoint;
+      }
+
+      @Override
+      public String toString() {
+         return stringRepresentation;
+      }
+   }
+
+   class GraphPathManager {
+
+      private int id = 1;
+      private int highestPoint;
+      private String arcToIgnore = "";
+      private LinkedList<Vertex> path = new LinkedList<>();
+
+      public void addVertex(Vertex vertex) {
+         path.add(vertex);
+      }
+
+      public Path getPath() {
+         StringBuilder result = new StringBuilder();
+         result.append(id);
+         result.append(": ");
+         for (int i = 0; i < path.size(); i++) {
+            result.append("(v").append(path.get(i).info + 1).append(": ").append(path.get(i).height).append("m)");
+            if (i + 1 < path.size()) result.append(" ==> ");
+         }
+         result.append("\nHighest point of path: ").append(highestPoint).append("m").append(" [Not included start and destination points if point count > 2]");
+         result.append("\nPoints in the route: ").append(path.size()).append("\n");
+
+         id += 1;
+         LinkedList<Vertex> pathPoints = new LinkedList<>(path);
+         if (path.size() == 2) arcToIgnore = "a" + path.get(0).id + "_" + path.get(1).id;
+         path.clear();
+         return new Path(pathPoints, result.toString(), highestPoint);
+      }
+      
+      public void pathPointsCorrection(String startId, String endId) {
+         List<Vertex> verticesToRemove = new ArrayList<>();
+         int current = path.size() - 1;
+         while (current != 0)
+            for (int i = 0; i < current; i++) {
+               if (current - 1 - i >= 0 && !areVerticesConnected(path.get(current - 1 - i), path.get(current))) {
+                  verticesToRemove.add(path.get(current - 1 - i));
+               }
+               else {
+                  current = current - 1 - i;
+                  break;
+               }
+         }
+
+         for (Vertex vertex : verticesToRemove) {
+            path.remove(vertex);
+         }
+         setHighestPoint(startId, endId);
+      }
+
+      private boolean areVerticesConnected(Vertex vertexFrom, Vertex vertexTo) {
+         Arc arc = vertexFrom.first;
+         while (arc != null) {
+            if (arc.target.id.equals(vertexTo.id)) return true;
+            arc = arc.next;
+         }
+         return false;
+      }
+
+      private void setHighestPoint(String startId, String endId) {
+         int value = -1000, startValue = 0, endValue = 0;
+         Vertex highest = null;
+         for (Vertex vertex : path) {
+            if (vertex.height > value && !vertex.id.equals(startId) && !vertex.id.equals(endId)) {
+               value = vertex.height;
+               highest = vertex;
+            } else if (vertex.id.equals(startId)) {
+               startValue = vertex.height;
+            } else if (vertex.id.equals(endId)) {
+               endValue = vertex.height;
+            }
+         }
+         if (highest != null) highest.inIgnore = true;
+         if (value == -1000 ) value = Math.max(startValue, endValue);
+         highestPoint = value;
+      }
+   }
 
    class Graph {
 
@@ -99,7 +247,7 @@ public class GraphTask {
       public String toString() {
          String nl = System.getProperty ("line.separator");
          StringBuffer sb = new StringBuffer (nl);
-         sb.append (id);
+         sb.append(id);
          sb.append (nl);
          Vertex v = first;
          while (v != null) {
@@ -225,6 +373,29 @@ public class GraphTask {
             connected [j][i] = 1;
             edgeCount--;  // a new edge happily created
          }
+      }
+
+      public void findPath(GraphPathManager path, Vertex start, String destinationId) {
+         LinkedList<Arc> queue = new LinkedList<>();
+         List<String> visitedPoints = new ArrayList<>();
+         queue.addLast(start.first);
+         path.addVertex(start);
+         visitedPoints.add(start.id);
+         while (queue.size() > 0) {
+            Arc current = queue.removeFirst();
+            while (current != null) {
+               if (current.id.equals(path.arcToIgnore)) current = current.next;
+               Vertex neighbor = current.target;
+               if (!visitedPoints.contains(neighbor.id) && !neighbor.inIgnore) {
+                  queue.addLast(neighbor.first);
+                  path.addVertex(neighbor);
+                  visitedPoints.add(neighbor.id);
+                  if (neighbor.id.equals(destinationId)) return;
+               }
+               current = current.next;
+            }
+         }
+         throw new RuntimeException("Start point and destination are not connected!");
       }
 
       // TODO!!! Your Graph methods here! Probably your solution belongs here.
