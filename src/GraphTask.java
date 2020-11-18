@@ -13,28 +13,30 @@ public class GraphTask {
    /** Actual main method to run examples and everything. */
    public void run() {
       Graph g = new Graph ("A");
-      g.createRandomSimpleGraph (10, 40); // max (2500, 3123475)
+      g.createRandomSimpleGraph (10, 45); // max (2500, 3123475)
       System.out.println(g.toString());
-      Path optimizedPath = getOptimizedPath(g, g.first, "v2"); // find path from first graph vertex to vertex with id v2
+      Path optimizedPath = getOptimizedPath(g, "v1", "v2"); // find path from first vertex with id v1 to vertex with id v2
       System.out.println("\nArc representation of best path:\n" + optimizedPath.printArcPath());
       System.out.println("\nVertex representation of best path:\n" + optimizedPath.toString());
    }
 
    /** Method that returns the best possible path, where the highest point is the lowest.
     * @param source an object containing vertices and arcs.
-    * @param startPoint a vertex object that is the starting point of the path search.
+    * @param startId a vertex id value that is the starting point of the path search.
     * @param destinationId the vertex id value that is the end point of the path.
     * @return Path class object that contains vertices and arcs from start point to destination point.
     */
-   public Path getOptimizedPath(Graph source, Vertex startPoint, String destinationId) {
+   public Path getOptimizedPath(Graph source, String startId, String destinationId) {
       GraphPathManager graphPathManager = new GraphPathManager();
+      Vertex start = findVertex(source, startId);
+      Vertex destination = findVertex(source, destinationId);
       List<Path> paths = new ArrayList<>();
       int index = 0;
       long startTime = System.currentTimeMillis();
 
       while (true) {
-         if (source.findPath(graphPathManager, startPoint, destinationId)) {
-            graphPathManager.pathPointsCorrection(startPoint.id, destinationId);
+         if (source.findPath(graphPathManager, start, destination)) {
+            graphPathManager.pathPointsCorrection(startId, destinationId);
             paths.add(index, graphPathManager.getPath());
             index++;
          } else {
@@ -54,7 +56,7 @@ public class GraphTask {
       }
 
       System.out.printf("Time spent - %,d ms", System.currentTimeMillis() - startTime);
-      System.out.println("\nPath from " + startPoint.id + " to " + destinationId);
+      System.out.println("\nPath from " + startId + " to " + destinationId);
       System.out.println("Paths found: " + paths.size());
 
       assert bestPath != null;
@@ -67,6 +69,29 @@ public class GraphTask {
       public GraphPathException(String message, String startId, String endId) {
          super(message + "\nStart vertex: " + startId + "\nDestination vertex: " + endId);
       }
+   }
+
+   /** Custom exception class for error displaying that occur when finding a vertex or arc in graph.  */
+   class GraphException extends RuntimeException {
+
+      public GraphException(String message) {
+         super(message);
+      }
+   }
+
+   /** Method searches for the required vertex in the given graph, if there is no such vertex
+    * it returns GraphException.
+    * @param source search graph.
+    * @param targetId id of the requested vertex. */
+   public Vertex findVertex(Graph source, String targetId) {
+      Vertex vertex = source.first;
+      while (vertex != null) {
+         if (vertex.id.equals(targetId)) {
+            return vertex;
+         }
+         vertex = vertex.next;
+      }
+      throw new GraphException("Current graph does not contain this vertex!");
    }
 
    /** Class that generates realistic elevation values ranging from -7 to 5642 meters
@@ -438,9 +463,9 @@ public class GraphTask {
        * Returns true on success. If there is no path from point a to b, it throws an GraphPathException.
        * @param path manager that processes the found path if path searching is successful.
        * @param start vertex from which path search starts.
-       * @param destinationId path endpoint identifier.
+       * @param destination path endpoint vertex.
        * @return boolean was the path found or not. */
-      public boolean findPath(GraphPathManager path, Vertex start, String destinationId) {
+      public boolean findPath(GraphPathManager path, Vertex start, Vertex destination) {
          LinkedList<Arc> queue = new LinkedList<>();
          List<String> visitedPoints = new ArrayList<>();
          queue.addLast(start.first);
@@ -451,16 +476,16 @@ public class GraphTask {
             while (current != null) {
                if (current.id.equals(path.arcToIgnore)) { current = current.next; continue; }
                Vertex neighbor = current.target;
-               if (!visitedPoints.contains(neighbor.id) && (neighbor.height < path.heightBorder || neighbor.id.equals(destinationId))) {
+               if (!visitedPoints.contains(neighbor.id) && (neighbor.height < path.heightBorder || neighbor.id.equals(destination.id))) {
                   queue.addLast(neighbor.first);
                   path.addVertex(neighbor);
                   visitedPoints.add(neighbor.id);
-                  if (neighbor.id.equals(destinationId)) return true;
+                  if (neighbor.id.equals(destination.id)) return true;
                }
                current = current.next;
             }
          }
-         if (path.id == 1) throw new GraphPathException("\nStart point and destination are not connected!", start.id, destinationId);
+         if (path.id == 1) throw new GraphPathException("\nStart point and destination are not connected!", start.id, destination.id);
          return false;
       }
    }
