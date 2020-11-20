@@ -24,8 +24,7 @@ public class GraphTask {
     * @param source an object containing vertices and arcs.
     * @param startId a vertex id value that is the starting point of the path search.
     * @param destinationId the vertex id value that is the end point of the path.
-    * @return Path class object that contains vertices and arcs from start point to destination point.
-    */
+    * @return Path class object that contains vertices and arcs from start point to destination point. */
    public Path getOptimizedPath(Graph source, String startId, String destinationId) {
       GraphPathManager graphPathManager = new GraphPathManager();
       Vertex start = findVertex(source, startId);
@@ -86,9 +85,7 @@ public class GraphTask {
    public Vertex findVertex(Graph source, String targetId) {
       Vertex vertex = source.first;
       while (vertex != null) {
-         if (vertex.id.equals(targetId)) {
-            return vertex;
-         }
+         if (vertex.id.equals(targetId)) return vertex;
          vertex = vertex.next;
       }
       throw new GraphException("Current graph does not contain this vertex!");
@@ -122,7 +119,7 @@ public class GraphTask {
    /** Base vertex class with an additional height parameter to compose an algorithm that solves my problem. */
    class Vertex {
 
-      private String id;
+      public final String id;
       private Vertex next;
       private Arc first;
       private int info;
@@ -137,6 +134,15 @@ public class GraphTask {
       Vertex (String s) {
          this (s, null, null);
       }
+
+      Vertex (String s, int h) {
+         this.id = s;
+         this.height = h;
+      }
+
+      public void setArc(Arc arc) { this.first = arc; }
+
+      public void setNextVertex(Vertex nextVertex) { this.next = nextVertex; }
 
       @Override
       public String toString() {
@@ -176,10 +182,10 @@ public class GraphTask {
     * Has a height parameter for sorting and a unique id. */
    class Path {
 
-      private final LinkedList<Vertex> pathVertexPoints; // list of path vertices
-      private final LinkedList<Arc> pathArcPoints; // list of path arcs
-      private final int highestPoint; // highest point of path
-      private final int id; // unique id
+      public final LinkedList<Vertex> pathVertexPoints; // list of path vertices
+      public final LinkedList<Arc> pathArcPoints; // list of path arcs
+      public final int highestPoint; // highest point of path
+      public final int id; // unique id
 
       Path (LinkedList<Vertex> pathVertexPoints, LinkedList<Arc> pathArcPoints, int highestPoint, int id) {
          this.pathVertexPoints = pathVertexPoints;
@@ -209,7 +215,7 @@ public class GraphTask {
          result.append(id);
          result.append(": ");
          for (int i = 0; i < pathVertexPoints.size(); i++) {
-            result.append("(v").append(pathVertexPoints.get(i).info + 1).append(": ").append(pathVertexPoints.get(i).height).append("m)");
+            result.append("(").append(pathVertexPoints.get(i).id).append(": ").append(pathVertexPoints.get(i).height).append("m)");
             if (i + 1 < pathVertexPoints.size()) result.append(" ==> ");
          }
          result.append("\nHighest point of path: ").append(highestPoint).append("m").append(" [Not included start and destination points if vertices more than 2]");
@@ -489,5 +495,4 @@ public class GraphTask {
          return false;
       }
    }
-
 }
