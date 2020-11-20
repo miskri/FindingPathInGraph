@@ -182,12 +182,12 @@ public class GraphTask {
     * Has a height parameter for sorting and a unique id. */
    class Path {
 
-      public final LinkedList<Vertex> pathVertexPoints; // list of path vertices
-      public final LinkedList<Arc> pathArcPoints; // list of path arcs
+      public final List<Vertex> pathVertexPoints; // list of path vertices
+      public final List<Arc> pathArcPoints; // list of path arcs
       public final int highestPoint; // highest point of path
       public final int id; // unique id
 
-      Path (LinkedList<Vertex> pathVertexPoints, LinkedList<Arc> pathArcPoints, int highestPoint, int id) {
+      Path (List<Vertex> pathVertexPoints, List<Arc> pathArcPoints, int highestPoint, int id) {
          this.pathVertexPoints = pathVertexPoints;
          this.pathArcPoints = pathArcPoints;
          this.highestPoint = highestPoint;
@@ -234,8 +234,8 @@ public class GraphTask {
       private int highestPoint;
       private int heightBorder = 10000; // param that will be used in path finding (Graph findPath method)
       private String arcToIgnore = "";
-      private LinkedList<Vertex> pathVertex = new LinkedList<>();
-      private LinkedList<Arc> pathArc = new LinkedList<>();
+      private List<Vertex> pathVertex = new ArrayList<>();
+      private List<Arc> pathArc = new ArrayList<>();
 
       public void addVertex(Vertex vertex) {
          pathVertex.add(vertex);
@@ -246,8 +246,8 @@ public class GraphTask {
        * @return Path object. */
       public Path getPath() {
          if (pathVertex.size() == 0) throw new GraphPathException("No available paths found!", "Null", "Null");
-         LinkedList<Vertex> pathVertexPoints = new LinkedList<>(pathVertex);
-         LinkedList<Arc> pathArcPoints = new LinkedList<>(pathArc);
+         List<Vertex> pathVertexPoints = new ArrayList<>(pathVertex);
+         List<Arc> pathArcPoints = new ArrayList<>(pathArc);
          if (pathVertex.size() == 2) arcToIgnore = pathArc.get(0).id;
          pathVertex.clear();
          pathArc.clear();
@@ -289,7 +289,7 @@ public class GraphTask {
          Arc arc = vertexFrom.first;
          while (arc != null) {
             if (arc.target.id.equals(vertexTo.id)) {
-               pathArc.addLast(arc);
+               pathArc.add(arc);
                return true;
             }
             arc = arc.next;
@@ -472,18 +472,18 @@ public class GraphTask {
        * @param destination path endpoint vertex.
        * @return boolean was the path found or not. */
       public boolean findPath(GraphPathManager path, Vertex start, Vertex destination) {
-         LinkedList<Arc> queue = new LinkedList<>();
+         Queue<Arc> queue = new LinkedList<>();
          List<String> visitedPoints = new ArrayList<>();
-         queue.addLast(start.first);
+         queue.add(start.first);
          path.addVertex(start);
          visitedPoints.add(start.id);
          while (queue.size() > 0) {
-            Arc current = queue.removeFirst();
+            Arc current = queue.remove();
             while (current != null) {
                if (current.id.equals(path.arcToIgnore)) { current = current.next; continue; }
                Vertex neighbor = current.target;
                if (!visitedPoints.contains(neighbor.id) && (neighbor.height < path.heightBorder || neighbor.id.equals(destination.id))) {
-                  queue.addLast(neighbor.first);
+                  queue.add(neighbor.first);
                   path.addVertex(neighbor);
                   visitedPoints.add(neighbor.id);
                   if (neighbor.id.equals(destination.id)) return true;

@@ -10,7 +10,9 @@ public class GraphTaskTest {
    public void algorithmPathDepthTestSet1() {
       GraphTask task = new GraphTask();
       GraphTask.Graph graph = getExampleGraph(new int[]{35, 47, 48, 49, 48, 50, 44, 34, 52, 50});
+      var time = System.currentTimeMillis();
       GraphTask.Path path = task.getOptimizedPath(graph, "A", "H");
+      System.out.println("Elapsed time: " + (System.currentTimeMillis() - time) + " ms");
       // right vertex path is A, B, C, D, E, H
       String[] resultIndexes = new String[]{"A", "B", "C", "D", "E", "H"};
       for (int i = 0; i < path.pathVertexPoints.size(); i++) {
@@ -22,7 +24,9 @@ public class GraphTaskTest {
    public void algorithmPathDepthTestSet2() {
       GraphTask task = new GraphTask();
       GraphTask.Graph graph = getExampleGraph(new int[]{100, 15, 90, 91, 25, 91, 50, 90, 90, 100});
+      var time = System.currentTimeMillis();
       GraphTask.Path path = task.getOptimizedPath(graph, "A", "H");
+      System.out.println("Elapsed time: " + (System.currentTimeMillis() - time) + " ms");
       // right vertex path is A, I, J, H
       String[] resultIndexes = new String[]{"A", "I", "J", "H"};
       for (int i = 0; i < path.pathVertexPoints.size(); i++) {
