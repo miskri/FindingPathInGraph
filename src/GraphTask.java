@@ -88,7 +88,7 @@ public class GraphTask {
          if (vertex.id.equals(targetId)) return vertex;
          vertex = vertex.next;
       }
-      throw new GraphException("Current graph does not contain this vertex!");
+      throw new GraphException("Current graph does not contain this vertex - " + targetId);
    }
 
    /** Class that generates realistic elevation values ranging from -7 to 5642 meters
