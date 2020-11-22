@@ -38,6 +38,29 @@ public class GraphTaskTest {
       }
    }
 
+   @Test
+   public void graphWithSimilarHeights() {
+       GraphTask task = new GraphTask();
+       GraphTask.Graph graph = getExampleGraph(new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+       var time = System.currentTimeMillis();
+       GraphTask.Path path = task.getOptimizedPath(graph, "A", "H");
+       System.out.println("Elapsed time: " + (System.currentTimeMillis() - time) + " ms");
+       System.out.println(path.toString());
+       System.out.println(path.printArcPath());
+       // right vertex path is A, B, C, D, E, H
+       String[] resultIndexes = new String[]{"A", "B", "C", "D", "E", "H"};
+       for (int i = 0; i < path.pathVertexPoints.size(); i++) {
+           assertEquals(path.pathVertexPoints.get(i).id, resultIndexes[i]);
+       }
+   }
+
+   @Test (expected= GraphTask.GraphPathException.class)
+   public void graphDoesNotContainPathFromTo() {
+       GraphTask task = new GraphTask();
+       GraphTask.Graph graph = getExampleGraph(new int[]{100, 15, 90, 91, 25, 91, 50, 90, 90, 100});
+       GraphTask.Path path = task.getOptimizedPath(graph, "I", "B");
+   }
+
    /** Attention! Maximum test execution time is 3 minutes! */
    @Test (timeout = 240000)
    public void averageAlgorithmExecutionTimeWithHugeData10Times() {
