@@ -31,7 +31,7 @@ public class HeightPath {
       long startTime = System.currentTimeMillis();
 
       while (true) {
-         if (source.findPath(graphPathManager, start, destination)) {
+         if (findPath(graphPathManager, start, destination)) {
             graphPathManager.pathPointsCorrection(startId, destinationId);
             paths.add(index, graphPathManager.getPath());
             index++;
@@ -69,7 +69,56 @@ public class HeightPath {
          if (vertex.id.equals(targetId)) return vertex;
          vertex = vertex.next;
       }
-      throw new Graph.GraphException("Current graph does not contain this vertex - " + targetId);
+      throw new GraphException("Current graph does not contain this vertex - " + targetId);
+   }
+
+   /** Main method which uses the breadth-first search algorithm and writes the traversed vertices to
+    * the GraphPathManager. It takes into account the heightBorder, which is the highest point of the
+    * previous path. If each new path exists, then it passes through the highest point which is lower
+    * than in the previous path found.
+    * Returns true on success. If there is no path from point a to b, it throws an GraphPathException.
+    * @param path manager that processes the found path if path searching is successful.
+    * @param start vertex from which path search starts.
+    * @param destination path endpoint vertex.
+    * @return boolean was the path found or not. */
+   public boolean findPath(HeightPath.GraphPathManager path, Vertex start, Vertex destination) {
+      Queue<Arc> queue = new LinkedList<>();
+      List<String> visitedPoints = new ArrayList<>();
+      queue.add(start.first);
+      path.addVertex(start);
+      visitedPoints.add(start.id);
+      while (queue.size() > 0) {
+         Arc current = queue.remove();
+         while (current != null) {
+            if (current.id.equals(path.arcToIgnore)) { current = current.next; continue; }
+            Vertex neighbor = current.target;
+            if (!visitedPoints.contains(neighbor.id) && (neighbor.height < path.heightBorder || neighbor.id.equals(destination.id))) {
+               queue.add(neighbor.first);
+               path.addVertex(neighbor);
+               visitedPoints.add(neighbor.id);
+               if (neighbor.id.equals(destination.id)) return true;
+            }
+            current = current.next;
+         }
+      }
+      if (path.id == 1) throw new GraphPathException("\nStart point and destination are not connected!", start.id, destination.id);
+      return false;
+   }
+
+   /** Custom exception class for error displaying that occur when finding a path.  */
+   class GraphPathException extends RuntimeException {
+
+      public GraphPathException(String message, String startId, String endId) {
+         super(message + "\nStart vertex: " + startId + "\nDestination vertex: " + endId);
+      }
+   }
+
+   /** Custom exception class for error displaying that occur when finding a vertex or arc in graph.  */
+   class GraphException extends RuntimeException {
+
+      public GraphException(String message) {
+         super(message);
+      }
    }
 
    /** Class that contains two lists for conveniently representing the resulting path.
@@ -139,7 +188,7 @@ public class HeightPath {
        * Returns an GraphPathException if the method is called with empty GraphPathManager variables.
        * @return Path object. */
       public Path getPath() {
-         if (pathVertex.size() == 0) throw new Graph.GraphPathException("No available paths found!", "Null", "Null");
+         if (pathVertex.size() == 0) throw new GraphPathException("No available paths found!", "Null", "Null");
          List<Vertex> pathVertexPoints = new ArrayList<>(pathVertex);
          List<Arc> pathArcPoints = new ArrayList<>(pathArc);
          if (pathVertex.size() == 2) arcToIgnore = pathArc.get(0).id;
