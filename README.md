@@ -12,7 +12,7 @@ Töötamiseks looge endale isiklik repositoorium, näiteks privaatne 'fork' bitb
 ```
 #!bash
 
-javac -cp src src/GraphTask.java
+javac -cp src src/HeightPath.java
 ```
 
 #### Execution. Käivitamine: ####
@@ -20,7 +20,7 @@ javac -cp src src/GraphTask.java
 ```
 #!bash
 
-java -cp src GraphTask
+java -cp src HeightPath
 ```
 
 
