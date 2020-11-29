@@ -57,14 +57,6 @@ public class Graph {
         previousVertex.next = new Vertex(vid);
     }
 
-    public Arc createArc(String aid, Vertex from, Vertex to) {
-        Arc res = new Arc(aid);
-        res.next = from.first;
-        from.first = res;
-        res.target = to;
-        return res;
-    }
-
     public Arc createArc(String aid, Vertex from, Vertex to, int weight) {
         Arc res = new Arc(aid);
         res.weight = weight;
@@ -231,7 +223,7 @@ public class Graph {
         while (guestArc != null) {
 
             if (!checkArcExistence(guestArc, homeVertex)) {
-                createArc("a" + homeVertex.id + "_" + guestArc.target.id, homeVertex, getTargetVertex(guestArc.target));
+                createArc("a" + homeVertex.id + "_" + guestArc.target.id, homeVertex, getTargetVertex(guestArc.target), guestVertex.weight);
             }
 
             guestArc = guestArc.getNext();
@@ -320,54 +312,6 @@ public class Graph {
             else return currentVertex;
         }
         throw new RuntimeException("Was unexpected situation in Graph when added Vertexes!");
-    }
-
-    /**
-     * Find all Arcs in current Graph.
-     *
-     * @param graph Graph which is one of the term
-     * @return array of Arcs IDs which contains this Graph
-     */
-    private ArrayList<String> getAllArcsId(Graph graph) {
-
-        ArrayList<String> arcsId = new ArrayList<>();
-        Vertex currentVertex = graph.getFirst();
-
-        while (currentVertex != null) {
-            Arc currentArc = currentVertex.getFirst();
-            while (currentArc != null) {
-                arcsId.add(currentArc.id);
-                currentArc = currentArc.getNext();
-            }
-            currentVertex = currentVertex.getNext();
-        }
-        return arcsId;
-    }
-
-    /**
-     * Remove duplicates from list of IDs.
-     *
-     * @param first  array of (Vertex or Arc) IDs
-     * @param second array of (Vertex or Arc) IDs
-     * @return array which consists of @param first and @param @second IDs (all duplicates are removed)
-     */
-    private ArrayList<String> uniteAllId(ArrayList<String> first, ArrayList<String> second) {
-        ArrayList<String> vertexesIdNoDuplicates;
-        ArrayList<String> big;
-
-        if (first.size() >= second.size()) {
-            vertexesIdNoDuplicates = second;
-            big = first;
-        } else {
-            vertexesIdNoDuplicates = first;
-            big = second;
-        }
-
-        for (String s : big) {
-            if (!vertexesIdNoDuplicates.contains(s)) vertexesIdNoDuplicates.add(s);
-        }
-
-        return vertexesIdNoDuplicates;
     }
 
     /**

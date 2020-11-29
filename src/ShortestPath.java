@@ -1,55 +1,12 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Container class to different classes, that makes the whole
  * set of classes one class formally.
  */
 public class ShortestPath {
-
-    /**
-     * Main method.
-     */
-    public static void main(String[] args) {
-        ShortestPath a = new ShortestPath();
-        a.run();
-    }
-
-    /**
-     * Actual main method to run examples and everything.
-     */
-    public void run() {
-        Graph c = new Graph("G");
-        c.createRandomSimpleGraph(2500, 10000);
-        Vertex from = c.getRandomVertex();
-        Vertex to = c.getRandomVertex();
-        var path = getPath(from, to, false, c);
-
-        long stime, ftime, diff;
-        stime = System.nanoTime();
-        path = getPath(from, to, false, c);
-        ftime = System.nanoTime();
-        diff = ftime - stime;
-        System.out.println(pathToString(path, from, to));
-        System.out.printf("First suitable path finding: time (ms): %s", diff / 1000000);
-        System.out.println();
-        stime = System.nanoTime();
-        path = getPath(from, to, true, c);
-        ftime = System.nanoTime();
-        diff = ftime - stime;
-        System.out.println();
-        System.out.println(pathToString(path, from, to));
-        System.out.printf("Smallest amount of vertices shortest path finding: time (ms): %s", diff / 1000000);
-        System.out.println();
-        stime = System.nanoTime();
-        setVerticesPathLength(from, c);
-        ftime = System.nanoTime();
-        diff = ftime - stime;
-        System.out.println();
-        System.out.printf("Dijkstra finding: time (ms): %s", diff / 1000000);
-    }
 
     /**
      * Create a list of arcs which creates path from

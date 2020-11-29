@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 public class FrontController {
 
     public static void main(String[] args) {
@@ -9,21 +11,21 @@ public class FrontController {
         Graph graph2 = new Graph("B");
         graph2.createRandomSimpleGraph(25, 25); // max (2500, 3123475)
 
+        System.out.println(tabulation + "\nALEKSEI ZAVORONKOV EXERCISE");
+        GraphsSum graphsSum = new GraphsSum(graph1, graph2);
+        Graph mainGraph = graphsSum.sum();
+        System.out.println(mainGraph);
+
         ShortestPath shortestPath = new ShortestPath();
-        Vertex vertexFrom = graph1.getRandomVertex();
-        Vertex vertexTo = graph1.getRandomVertex();
-        var path = shortestPath.getPath(vertexFrom, vertexTo, false, graph1);
+        Vertex vertexFrom = mainGraph.getRandomVertex();
+        Vertex vertexTo = mainGraph.getRandomVertex();
+        LinkedList<Arc> path = shortestPath.getPath(vertexFrom, vertexTo, false, mainGraph);
         System.out.println(tabulation + "\nBORISS DROZDOV EXERCISE\n");
         System.out.println(shortestPath.pathToString(path, vertexFrom, vertexTo) + tabulation);
 
         System.out.println("MIHHAIL SKRIPNIK EXERCISE\n");
-        HeightPath heightPath = new HeightPath(graph2);
-        heightPath.run();
+        HeightPath heightPath = new HeightPath(mainGraph);
+        heightPath.run("v1", "v10");
         System.out.println(tabulation);
-
-        System.out.println("ALEKSEI ZAVORONKOV EXERCISE");
-        GraphsSum graphsSum = new GraphsSum(graph1, graph2);
-        Graph mainGraph = graphsSum.sum();
-        System.out.println(mainGraph + tabulation);
     }
 }

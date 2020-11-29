@@ -11,8 +11,8 @@ public class HeightPath {
    }
 
    /** Actual main method to run examples and everything. */
-   public void run() {
-      Path optimizedPath = getOptimizedPath(graph, "v1", "v10"); // find path from first vertex with id v1 to vertex with id v2
+   public void run(String vStart, String vDestination) {
+      Path optimizedPath = getOptimizedPath(graph, vStart, vDestination); // find path from first vertex with id v1 to vertex with id v2
       System.out.println("\nArc representation of best path:\n" + optimizedPath.printArcPath());
       System.out.println("\nVertex representation of best path:\n" + optimizedPath.toString());
    }
