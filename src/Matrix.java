@@ -47,21 +47,21 @@ public class Matrix {
      *               (Every "1" in a matrix indicates a pair between two vertices)
      */
     public Graph createGraphFromAdjMatrix(int[][] matrix) {
-        var g = new Graph(" GRAPH FROM MATRIX");
-        g.first = null;
+        Graph graph = new Graph(" GRAPH FROM MATRIX");
+        graph.first = null;
         Vertex[] vertices = new Vertex[matrix.length];
 
         for (int i = 0; i < matrix.length; i++) {
-            vertices[i] = g.createVertex(String.valueOf(matrix.length - 1 - i));
+            vertices[i] = graph.createVertex(String.valueOf(matrix.length - 1 - i));
         }
 
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
                 if (matrix[i][j] == 1) {
-                    g.createArc("", vertices[matrix.length - 1 - i], vertices[matrix.length - 1 - j]);
+                    graph.createArc("", vertices[matrix.length - 1 - i], vertices[matrix.length - 1 - j]);
                 }
             }
         }
-        return g;
+        return graph;
     }
 }
