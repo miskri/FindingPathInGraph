@@ -4,7 +4,7 @@
  */
 public class Matrix {
 
-    private Graph graph;
+    private final Graph graph;
 
     Matrix(Graph graph) {
         this.graph = graph;
@@ -13,8 +13,7 @@ public class Matrix {
     public void run() {
         int[][] adjMatrix = graph.createAdjMatrix();
         transitiveClosureFloydWarshall(adjMatrix);
-        createGraphFromAdjMatrix(adjMatrix);
-        System.out.println(graph);
+        System.out.println(createGraphFromAdjMatrix(adjMatrix));
     }
 
     /**
@@ -45,23 +44,24 @@ public class Matrix {
      * to the structure of the input matrix.
      *
      * @param matrix an adjacency matrix of a graph
-     * (Every "1" in a matrix indicates a pair between two vertices)
+     *               (Every "1" in a matrix indicates a pair between two vertices)
      */
-    public void createGraphFromAdjMatrix(int[][] matrix) {
-        graph.first = null;
-        graph.id += " GRAPH FROM MATRIX";
+    public Graph createGraphFromAdjMatrix(int[][] matrix) {
+        var g = new Graph(" GRAPH FROM MATRIX");
+        g.first = null;
         Vertex[] vertices = new Vertex[matrix.length];
 
         for (int i = 0; i < matrix.length; i++) {
-            vertices[i] = graph.createVertex(String.valueOf(matrix.length - 1 - i));
+            vertices[i] = g.createVertex(String.valueOf(matrix.length - 1 - i));
         }
 
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
                 if (matrix[i][j] == 1) {
-                    graph.createArc("", vertices[matrix.length - 1 - i], vertices[matrix.length - 1 - j], 0);
+                    g.createArc("", vertices[matrix.length - 1 - i], vertices[matrix.length - 1 - j]);
                 }
             }
         }
+        return g;
     }
 }

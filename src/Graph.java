@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.Random;
 
 /**
  * Class which represents Graph itself with vertexes and arcs.
@@ -57,13 +57,19 @@ public class Graph {
         previousVertex.next = new Vertex(vid);
     }
 
-    public Arc createArc(String aid, Vertex from, Vertex to, int weight) {
+    public void createArc(String aid, Vertex from, Vertex to) {
+        Arc res = new Arc(aid);
+        res.next = from.first;
+        from.first = res;
+        res.target = to;
+    }
+
+    public void createArc(String aid, Vertex from, Vertex to, int weight) {
         Arc res = new Arc(aid);
         res.weight = weight;
         res.next = from.first;
         from.first = res;
         res.target = to;
-        return res;
     }
 
     /**
@@ -223,7 +229,7 @@ public class Graph {
         while (guestArc != null) {
 
             if (!checkArcExistence(guestArc, homeVertex)) {
-                createArc("a" + homeVertex.id + "_" + guestArc.target.id, homeVertex, getTargetVertex(guestArc.target), guestVertex.weight);
+                createArc("a" + homeVertex.id + "_" + guestArc.target.id, homeVertex, getTargetVertex(guestArc.target), guestArc.weight);
             }
 
             guestArc = guestArc.getNext();
@@ -332,15 +338,19 @@ public class Graph {
         return last;
     }
 
-    /** Class that generates realistic elevation values ranging from -7 to 5642 meters
-     * (the lowest and highest point in Europe above sea level). */
+    /**
+     * Class that generates realistic elevation values ranging from -7 to 5642 meters
+     * (the lowest and highest point in Europe above sea level).
+     */
     static class HeightGenerator {
         static int previousHeight = 143; // 143m height of the center of Tallinn above sea level
         static int maxValueElevation = 10; // 10m maximal difference between 2 vertices
         static int heightMin = -7; // The lowest point -7m is in the north of Rotterdam
         static int heightMax = 5642; // The height of Mount Elbrus is 5642m above sea level
 
-        /** Method that randomly generates the height for a point, taking into account the above parameters. */
+        /**
+         * Method that randomly generates the height for a point, taking into account the above parameters.
+         */
         static int getHeight() {
             Random rand = new Random();
             int value = rand.nextInt(maxValueElevation);
